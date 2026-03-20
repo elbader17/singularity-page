@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINGULARITY // OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neon: {
+                            green: '#00ff41',
+                            yellow: '#ccff00',
+                            red: '#ff003c',
+                            purple: '#b026ff'
+                        },
+                        base: {
+                            900: '#050505',
+                            800: '#0a0a0a',
+                            700: '#141414',
+                            600: '#262626'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'brutal-green': '4px 4px 0px #00ff41',
+                        'brutal-yellow': '4px 4px 0px #ccff00',
+                        'brutal-purple': '4px 4px 0px #b026ff',
+                        'brutal-white': '4px 4px 0px #ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Space+Grotesk:wght@500;700&family=Inter:wght@400&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+        }
+
+        .bg-noise {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 49;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+            color: white;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff003c;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ff41;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(47px, 9999px, 83px, 0); }
+            20% { clip: rect(61px, 9999px, 14px, 0); }
+            40% { clip: rect(31px, 9999px, 98px, 0); }
+            60% { clip: rect(10px, 9999px, 53px, 0); }
+            80% { clip: rect(72px, 9999px, 21px, 0); }
+            100% { clip: rect(2px, 9999px, 89px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(12px, 9999px, 59px, 0); }
+            20% { clip: rect(78px, 9999px, 34px, 0); }
+            40% { clip: rect(45px, 9999px, 87px, 0); }
+            60% { clip: rect(90px, 9999px, 11px, 0); }
+            80% { clip: rect(23px, 9999px, 67px, 0); }
+            100% { clip: rect(56px, 9999px, 42px, 0); }
+        }
+
+        .brutal-border {
+            border: 2px solid #333;
+            transition: all 0.2s ease;
+        }
+        .brutal-border:hover {
+            border-color: #ccff00;
+            box-shadow: 4px 4px 0px #ccff00;
+            transform: translate(-2px, -2px);
+        }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #050505; border-left: 1px solid #333; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: #ccff00; }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Rutas de animación de datos (Data Flow) */
+        @keyframes movePacketLeft {
+            0% { top: 0; left: 16.66%; opacity: 0; }
+            5% { opacity: 1; }
+            35% { top: 60px; left: 16.66%; }
+            65% { top: 60px; left: 50%; }
+            95% { top: 120px; left: 50%; opacity: 1; }
+            100% { top: 120px; left: 50%; opacity: 0; }
+        }
+
+        @keyframes movePacketRight {
+            0% { top: 0; right: 16.66%; opacity: 0; }
+            5% { opacity: 1; }
+            35% { top: 60px; right: 16.66%; }
+            65% { top: 60px; right: 50%; }
+            95% { top: 120px; right: 50%; opacity: 1; }
+            100% { top: 120px; right: 50%; opacity: 0; }
+        }
+
+        @keyframes movePacketDown {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { top: 100%; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .packet-left {
+            animation: movePacketLeft 3s infinite linear;
+        }
+        
+        .packet-right {
+            animation: movePacketRight 3.5s infinite linear;
+            animation-delay: 1.5s;
+        }
+
+        .packet-down {
+            animation: movePacketDown 3s infinite linear;
+        }
+
+        .packet-down-delayed {
+            animation: movePacketDown 3s infinite linear;
+            animation-delay: 1.5s;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-neon-yellow selection:text-black">
+    
+    <div class="bg-noise"></div>
+    <div class="scanlines"></div>
+    <div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-40 bg-base-900/90 backdrop-blur-sm border-b-2 border-base-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 font-mono text-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-4 h-4 bg-neon-yellow animate-pulse"></div>
+                    <span class="font-bold text-white tracking-widest">SNG//OS</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="hover:text-neon-yellow transition-colors" data-i18n="nav.core">[ CORE ]</a>
+                    <a href="#architecture" class="hover:text-neon-green transition-colors" data-i18n="nav.arq">[ ARQ ]</a>
+                    <a href="#tools" class="hover:text-neon-purple transition-colors" data-i18n="nav.mcp">[ MCP ]</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <select id="lang-selector" onchange="changeLanguage(this.value)" class="bg-base-800 text-white text-xs font-mono px-3 py-2 border border-base-600 hover:border-neon-yellow focus:outline-none cursor-pointer">
+                            <option value="en">EN</option>
+                            <option value="es">ES</option>
+                        </select>
+                    </div>
+                    <a href="#install" class="bg-white text-black font-bold px-4 py-2 hover:bg-neon-yellow transition-colors uppercase tracking-wider text-xs border border-white" data-i18n="nav.init">
+                        Init Sequence
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow z-10 pt-24 pb-16 relative">
+        
+        <!-- Hero Section -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <div class="font-mono text-neon-green text-sm flex items-center gap-2">
+                        <span>></span>
+                        <span class="typing-effect" data-i18n="hero.state">SYSTEM.STATE.MEMORY_ENGINE = ACTIVE</span>
+                    </div>
+                    <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-none glitch text-white" data-text="SINGULARITY">
+                        SINGULARITY
+                    </h1>
+                    <p class="font-mono text-base-400 max-w-xl text-sm leading-relaxed border-l-2 border-neon-purple pl-4" data-i18n="hero.description">
+                        Motor de orquestación para agentes autónomos. Patrón Blackboard nativo. <strong class="text-white font-bold">Optimizado estratégicamente para modelos de IA que facturan por <i>request</i> (no por token).</strong> Lee y escribe el estado sin comunicación directa. Aislamiento absoluto.
+                    </p>
+                    <div class="flex flex-wrap gap-4 font-mono text-sm">
+                        <a href="#install" class="bg-neon-yellow text-black px-6 py-3 font-bold hover:bg-white transition-colors flex items-center gap-2 shadow-brutal-white border border-black" data-i18n="hero.execute">
+                            > EJECUTAR
+                        </a>
+                        <a href="https://github.com/elbader17/singularity" target="_blank" class="bg-base-800 border-2 border-base-600 text-white px-6 py-3 font-bold hover:border-neon-purple transition-colors flex items-center gap-2" data-i18n="hero.docs">
+                            LEER_DOCS
+                        </a>
+                    </div>
+                </div>
+
+                <!-- TTY Terminal -->
+                <div id="install" class="scroll-mt-32 bg-base-900 border-2 border-base-600 shadow-brutal-green p-1 relative font-mono text-sm overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-2 text-base-600 group-hover:text-neon-green transition-colors">
+                        <i data-lucide="terminal" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-base-800 p-6 h-full text-gray-300">
+                        <div class="text-base-500 mb-4" data-i18n="terminal.host">root@singularity-host:~#</div>
+                        <div class="space-y-2">
+                            <p><span class="text-neon-yellow">➜</span> <span data-i18n="terminal.clone">git clone https://github.com/elbader17/singularity.git</span></p>
+                            <p><span class="text-neon-yellow">➜</span> <span data-i18n="terminal.cd">cd singularity</span></p>
+                            <p><span class="text-neon-yellow">➜</span> <span data-i18n="terminal.build">go build -o singularity ./cmd/singularity</span></p>
+                            <p><span class="text-neon-yellow">➜</span> <span data-i18n="terminal.init">./singularity init</span></p>
+                            <p class="text-neon-green mt-4" data-i18n="terminal.ok">
+                                [OK] Configuración inyectada en ~/.config/opencode/opencode.jsonc
+                            </p>
+                            <p class="text-base-400" data-i18n="terminal.info">
+                                [INFO] MCP Server listo para conexiones entrantes.
+                            </p>
+                            <div class="flex items-center gap-2 mt-4">
+                                <span class="text-neon-yellow">➜</span> <span class="w-2 h-4 bg-white animate-pulse"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marquee / Ticker -->
+        <div class="w-full border-y-2 border-base-700 bg-base-800 mt-32 overflow-hidden py-3 font-mono text-xs uppercase text-base-400 whitespace-nowrap flex items-center">
+            <div class="animate-[marquee_20s_linear_infinite] inline-block">
+                <span data-i18n="marquee.zp">[ ZERO PING-PONG ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.co">[ COST OPTIMIZED ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.pre">[ PER-REQUEST EFFICIENCY ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.dag">[ DAG ORCHESTRATION ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.iso">[ ISOLATED SUB-AGENTS ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.da">[ DEEP ARCHIVE ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.co2">[ COST OPTIMIZED ]</span> <span class="mx-4 text-neon-purple">///</span>
+                <span data-i18n="marquee.dag2">[ DAG ORCHESTRATION ]</span> <span class="mx-4 text-neon-purple">///</span>
+            </div>
+        </div>
+
+        <!-- Core Features -->
+        <div id="features" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-32">
+            <h2 class="text-4xl font-bold mb-12 flex items-center gap-4">
+                <span class="w-8 h-8 bg-neon-green flex items-center justify-center text-black text-xl">/</span>
+                <span class="text-white" data-i18n="features.title">CORE.SYS</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono">
+                <div class="bg-base-800 p-6 brutal-border">
+                    <div class="text-neon-green mb-4" data-i18n="features.act01">01 // ACT_BRAIN</div>
+                    <h3 class="text-white font-bold text-xl mb-2 font-display" data-i18n="features.act02">Cerebro Activo</h3>
+                    <p class="text-sm text-base-400" data-i18n="features.act03">Estado del proyecto inyectado sin costo de API externo. Contexto inmediato 100% disponible offline.</p>
+                </div>
+                <div class="bg-base-800 p-6 brutal-border">
+                    <div class="text-neon-purple mb-4" data-i18n="features.deep01">02 // DEEP_ARCH</div>
+                    <h3 class="text-white font-bold text-xl mb-2 font-display" data-i18n="features.deep02">Archivo Profundo</h3>
+                    <p class="text-sm text-base-400" data-i18n="features.deep03">Contexto histórico bajo demanda. Mantiene la ventana de tokens enfocada y evita alucinaciones por exceso de ruido.</p>
+                </div>
+                <div class="bg-base-800 p-6 brutal-border">
+                    <div class="text-neon-yellow mb-4" data-i18n="features.dag01">03 // DAG_TASK</div>
+                    <h3 class="text-white font-bold text-xl mb-2 font-display" data-i18n="features.dag02">Orquestación DAG</h3>
+                    <p class="text-sm text-base-400" data-i18n="features.dag03">Dependencias estructurales en grafos. El caos de la inteligencia generativa se somete a la topología matemática estricta.</p>
+                </div>
+                <div class="bg-base-800 p-6 brutal-border">
+                    <div class="text-white mb-4" data-i18n="features.iso01">04 // ISO_ENV</div>
+                    <h3 class="text-white font-bold text-xl mb-2 font-display" data-i18n="features.iso02">Agentes Aislados</h3>
+                    <p class="text-sm text-base-400" data-i18n="features.iso03">Zero contaminación cruzada. Cada sub-agente recibe solo las variables de su ecuación, aumentando la precisión en modelos de razonamiento.</p>
+                </div>
+                <div class="bg-base-800 p-6 brutal-border lg:col-span-2 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 bg-neon-red/10 blur-3xl rounded-full"></div>
+                    <div class="text-neon-red mb-4 relative z-10" data-i18n="features.zro01">05 // ZRO_PING</div>
+                    <h3 class="text-white font-bold text-xl mb-2 font-display relative z-10" data-i18n="features.zro02">Ejecución en un Hit <span class="text-neon-yellow text-sm ml-2">[COST OPTIMIZED]</span></h3>
+                    <p class="text-sm text-base-400 max-w-lg relative z-10" data-i18n="features.zro03">Un request = acción completa. <strong class="text-white font-bold">Vital para planes de IA que facturan por petición, no por volumen de tokens.</strong> Eliminación radical de "charlas exploratorias" (ping-pong) con la API. Deducción algorítmica y mutación de estado en una sola pasada.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture - Schematic View -->
+        <div id="architecture" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-40">
+            <h2 class="text-4xl font-bold mb-12 flex items-center gap-4">
+                <span class="w-8 h-8 bg-neon-purple flex items-center justify-center text-white text-xl">/</span>
+                <span class="text-white" data-i18n="arch.title">TOPOLOGY</span>
+            </h2>
+
+            <div class="relative bg-base-900 border-2 border-base-700 p-8 font-mono shadow-brutal-purple overflow-hidden">
+                <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#b026ff 1px, transparent 1px); background-size: 20px 20px;"></div>
+                
+                <div class="text-xs text-neon-purple mb-8 border-b border-base-700 pb-2 inline-block uppercase tracking-widest" data-i18n="arch.subtitle">>> Blackboard_Pattern_Engine</div>
+
+                <!-- Storage Nodes -->
+                <div class="flex flex-col md:flex-row justify-around items-center gap-6 relative z-10 mb-16">
+                    <div class="border border-neon-green bg-base-800 p-4 text-center w-full md:w-48 shadow-[0_0_15px_rgba(0,255,65,0.2)]">
+                        <div class="text-xs text-base-500 mb-1" data-i18n="arch.mem01">MEM_01</div>
+                        <div class="font-bold text-neon-green" data-i18n="arch.active">ACTIVE BRAIN</div>
+                    </div>
+                    <div class="border border-base-600 bg-base-800 p-4 text-center w-full md:w-48">
+                        <div class="text-xs text-base-500 mb-1" data-i18n="arch.mem02">MEM_02</div>
+                        <div class="font-bold text-white" data-i18n="arch.deep">DEEP ARCHIVE</div>
+                    </div>
+                    <div class="border border-base-600 bg-base-800 p-4 text-center w-full md:w-48">
+                        <div class="text-xs text-base-500 mb-1" data-i18n="arch.q01">Q_01</div>
+                        <div class="font-bold text-white" data-i18n="arch.dag">TASK DAG</div>
+                    </div>
+                </div>
+
+                <!-- Visual Connector Logic (Mobile) -->
+                <div class="block md:hidden absolute top-[100px] bottom-[150px] left-1/2 -translate-x-1/2 w-[2px] bg-base-700 pointer-events-none z-0">
+                    <!-- Animated Data Packet (Moving down) -->
+                    <div class="absolute w-2 h-2 bg-neon-green left-1/2 -translate-x-1/2 shadow-[0_0_10px_#00ff41] packet-down z-20"></div>
+                    <!-- Animated Data Packet 2 (Moving down, delayed) -->
+                    <div class="absolute w-2 h-2 bg-neon-yellow left-1/2 -translate-x-1/2 shadow-[0_0_10px_#ccff00] packet-down-delayed z-20"></div>
+                </div>
+
+                <!-- Visual Connector Logic (Desktop) -->
+                <div class="hidden md:block absolute top-[140px] left-0 right-0 h-[120px] pointer-events-none z-0">
+                    <!-- Horizontal Bus -->
+                    <div class="absolute top-[60px] left-[16.66%] right-[16.66%] h-[2px] bg-base-700"></div>
+                    
+                    <!-- Left Vertical Drop -->
+                    <div class="absolute top-0 left-[16.66%] w-[2px] h-[60px] bg-base-700"></div>
+                    
+                    <!-- Right Vertical Drop -->
+                    <div class="absolute top-0 right-[16.66%] w-[2px] h-[60px] bg-base-700"></div>
+                    
+                    <!-- Center Vertical Drop (Archive to Orchestrator) -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-[120px] bg-neon-purple/30 border-l-2 border-dashed border-neon-purple"></div>
+                    
+                    <!-- Center Vertical Drop (Bus to Orchestrator) -->
+                    <div class="absolute top-[60px] left-1/2 -translate-x-1/2 w-[2px] h-[60px] bg-base-700"></div>
+
+                    <!-- Animated Data Packet (Center Pulse Node) -->
+                    <div class="absolute top-[60px] left-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center z-10">
+                        <div class="w-full h-full bg-neon-green/30 rounded-sm animate-ping absolute"></div>
+                        <div class="w-2 h-2 bg-neon-green shadow-[0_0_10px_#00ff41]"></div>
+                    </div>
+
+                    <!-- Animated Data Packet (Moving down from Brain) -->
+                    <div class="absolute w-2 h-2 bg-neon-green -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_#00ff41] packet-left z-20"></div>
+                    
+                    <!-- Animated Data Packet (Moving down from Tasks) -->
+                    <div class="absolute w-2 h-2 bg-neon-yellow translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_#ccff00] packet-right z-20"></div>
+                </div>
+
+                <!-- Agent Nodes -->
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 relative z-10 mt-16 md:mt-24">
+                    <div class="border-2 border-neon-yellow bg-black p-4 text-center w-full md:w-64 relative group">
+                        <div class="absolute -top-3 -right-3 bg-neon-yellow text-black text-xs font-bold px-2 py-1" data-i18n="arch.root">ROOT</div>
+                        <div class="font-bold text-white text-lg" data-i18n="arch.orch">ORCHESTRATOR</div>
+                        <div class="text-xs text-base-500 mt-2" data-i18n="arch.state">GLOBAL.STATE.R/W</div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 relative z-10 mt-6">
+                    <div class="border border-base-600 bg-base-800 p-3 text-center w-full md:w-48">
+                        <div class="text-sm font-bold text-base-300" data-i18n="arch.subA">SUB-AGENT_A</div>
+                        <div class="text-[10px] text-base-600 mt-1" data-i18n="arch.ctxA">ISOLATED.CTX</div>
+                    </div>
+                    <div class="border border-base-600 bg-base-800 p-3 text-center w-full md:w-48">
+                        <div class="text-sm font-bold text-base-300" data-i18n="arch.subB">SUB-AGENT_B</div>
+                        <div class="text-[10px] text-base-600 mt-1" data-i18n="arch.ctxB">ISOLATED.CTX</div>
+                    </div>
+                </div>
+
+                <!-- Lower metrics -->
+                <div class="mt-12 pt-6 border-t border-base-700 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="text-base-400"><span class="text-white">internal/storage</span> » <span data-i18n="arch.badger">BadgerDB persistence</span></div>
+                    <div class="text-base-400"><span class="text-white">internal/mcp</span> » <span data-i18n="arch.mcp">Tool exposition layer</span></div>
+                    <div class="text-base-400"><span class="text-white">internal/protocol</span> » <span data-i18n="arch.ctx">Context injection</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MCP Tools Interface -->
+        <div id="tools" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-40">
+            <h2 class="text-4xl font-bold mb-12 flex items-center gap-4">
+                <span class="w-8 h-8 bg-neon-yellow flex items-center justify-center text-black text-xl">/</span>
+                <span class="text-white">MCP.API</span>
+            </h2>
+
+            <div class="flex flex-col lg:flex-row h-[600px] border-2 border-base-700 bg-base-900 shadow-brutal-white">
+                <!-- Sidebar -->
+                <div class="w-full lg:w-1/3 flex flex-col border-b-2 lg:border-b-0 lg:border-r-2 border-base-700 overflow-y-auto bg-base-900" id="tool-tabs">
+                    <div class="p-4 text-xs font-mono text-base-500 uppercase tracking-widest border-b border-base-800" data-i18n="mcp.available">Available Methods</div>
+                    
+                    <button onclick="switchTool('commit_world_state')" id="tab-commit_world_state" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-neon-red bg-base-800 text-white">
+                        commit_world_state()
+                    </button>
+                    <button onclick="switchTool('get_active_brain')" id="tab-get_active_brain" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        get_active_brain()
+                    </button>
+                    <button onclick="switchTool('list_tasks')" id="tab-list_tasks" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        list_tasks()
+                    </button>
+                    <button onclick="switchTool('fetch_deep_context')" id="tab-fetch_deep_context" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        fetch_deep_context()
+                    </button>
+                    <button onclick="switchTool('spawn_sub_agent')" id="tab-spawn_sub_agent" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        spawn_sub_agent()
+                    </button>
+                    <button onclick="switchTool('get_sub_agent_task')" id="tab-get_sub_agent_task" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        get_sub_agent_task()
+                    </button>
+                    <button onclick="switchTool('complete_sub_agent_task')" id="tab-complete_sub_agent_task" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        complete_sub_agent_task()
+                    </button>
+                    <button onclick="switchTool('switch_agent')" id="tab-switch_agent" class="text-left w-full px-4 py-4 font-mono text-sm transition-all border-l-4 border-transparent text-base-400 hover:bg-base-800 hover:text-white">
+                        switch_agent()
+                    </button>
+                </div>
+
+                <!-- Code Area -->
+                <div class="w-full lg:w-2/3 bg-black relative flex flex-col font-mono">
+                    <div class="flex items-center gap-4 px-4 py-2 border-b border-base-800 text-xs text-base-600 bg-base-900">
+                        <span class="text-neon-yellow">PAYLOAD</span>
+                        <span>|</span>
+                        <span>JSON</span>
+                    </div>
+                    
+                    <div class="p-6 overflow-y-auto flex-1 text-sm md:text-base leading-relaxed">
+                        <!-- commit_world_state -->
+                        <div id="content-commit_world_state" class="tool-content">
+                            <div class="mb-6 border-l-2 border-neon-red pl-4 text-base-400 text-sm">
+                                <span class="text-neon-red font-bold uppercase block mb-1">>> Mandatory Execution</span>
+                                <span data-i18n="mcp.commit_desc">Consolida el estado tras mutación. Inyecta insights en el Brain.</span>
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"session_id"</span>: <span class="text-neon-green">"ses-123"</span>,
+  <span class="text-neon-purple">"project_path"</span>: <span class="text-neon-green">"/path/to/project"</span>,
+  <span class="text-neon-purple">"completed_task_id"</span>: <span class="text-neon-green">"task-456"</span>,
+  <span class="text-neon-purple">"task_summary"</span>: <span class="text-neon-green">"Implemented login system"</span>,
+  <span class="text-neon-purple">"orchestrator_summary"</span>: <span class="text-neon-green">"Authentication ready for API integration"</span>,
+  <span class="text-neon-purple">"learned_insights"</span>: <span class="text-neon-green">"Auth module has reusable code"</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- get_active_brain -->
+                        <div id="content-get_active_brain" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm" data-i18n="mcp.brain_desc">
+                                Obtiene snapshot del estado actual. Cero costo API externo.
+                            </div>
+<pre class="text-base-300"><span class="text-base-600">// << Response Buffer >></span>
+<span class="text-white">{</span>
+  <span class="text-neon-purple">"tasks"</span>: <span class="text-neon-yellow">[...]</span>,
+  <span class="text-neon-purple">"recent_decisions"</span>: <span class="text-neon-yellow">[...]</span>,
+  <span class="text-neon-purple">"active_count"</span>: <span class="text-neon-red">2</span>,
+  <span class="text-neon-purple">"pending_count"</span>: <span class="text-neon-red">5</span>,
+  <span class="text-neon-purple">"completed_count"</span>: <span class="text-neon-red">10</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- list_tasks -->
+                        <div id="content-list_tasks" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm" data-i18n="mcp.list_desc">
+                                Consulta de topología DAG por estado.
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"status"</span>: <span class="text-neon-green">"pending"</span>  <span class="text-base-600">// Enum: pending | in_progress | completed</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- fetch_deep_context -->
+                        <div id="content-fetch_deep_context" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm">
+                                <span class="text-neon-yellow font-bold uppercase block mb-1">>> Warning</span>
+                                <span data-i18n="mcp.deep_desc">Acceso al Archive. Usar solo ante miss crítico en Active Brain.</span>
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"query"</span>: <span class="text-neon-green">"authentication"</span>,
+  <span class="text-neon-purple">"task_id"</span>: <span class="text-neon-green">"task-123"</span>,  <span class="text-base-600">// Opt</span>
+  <span class="text-neon-purple">"limit"</span>: <span class="text-neon-red">10</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- spawn_sub_agent -->
+                        <div id="content-spawn_sub_agent" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm" data-i18n="mcp.spawn_desc">
+                                Bifurcación de proceso. Crea sub-entidad con contexto aislado.
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"session_id"</span>: <span class="text-neon-green">"ses-123"</span>,
+  <span class="text-neon-purple">"project_path"</span>: <span class="text-neon-green">"/path/to/project"</span>,
+  <span class="text-neon-purple">"title"</span>: <span class="text-neon-green">"Implement logout"</span>,
+  <span class="text-neon-purple">"description"</span>: <span class="text-neon-green">"Create logout endpoint"</span>,
+  <span class="text-neon-purple">"context"</span>: <span class="text-neon-green">"Use existing auth/ code"</span>
+<span class="text-white">}</span>
+
+<span class="text-base-600">// << Spawn Result >></span>
+<span class="text-white">{</span>
+  <span class="text-neon-purple">"success"</span>: <span class="text-neon-red">true</span>,
+  <span class="text-neon-purple">"sub_agent_id"</span>: <span class="text-neon-green">"sub-abc123"</span>,
+  <span class="text-neon-purple">"task_id"</span>: <span class="text-neon-green">"task-789"</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- get_sub_agent_task -->
+                        <div id="content-get_sub_agent_task" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm" data-i18n="mcp.get_task_desc">
+                                Init sequence para el sub-agente. Recupera sus parámetros de entorno.
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"sub_agent_id"</span>: <span class="text-neon-green">"sub-abc123"</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- complete_sub_agent_task -->
+                        <div id="content-complete_sub_agent_task" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm" data-i18n="mcp.complete_desc">
+                                Terminación de hilo. Reporte de mutación al Orchestrator.
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"sub_agent_id"</span>: <span class="text-neon-green">"sub-abc123"</span>,
+  <span class="text-neon-purple">"result"</span>: <span class="text-neon-green">"Logout implemented with JWT blacklist"</span>
+<span class="text-white">}</span></pre>
+                        </div>
+
+                        <!-- switch_agent -->
+                        <div id="content-switch_agent" class="tool-content hidden">
+                            <div class="mb-6 border-l-2 border-white pl-4 text-base-400 text-sm" data-i18n="mcp.switch_desc">
+                                Context switch de la sesión activa en terminal.
+                            </div>
+<pre class="text-base-300"><span class="text-white">{</span>
+  <span class="text-neon-purple">"mode"</span>: <span class="text-neon-green">"sub_agent"</span>,  <span class="text-base-600">// Enum: sub_agent | orchestrator</span>
+  <span class="text-neon-purple">"sub_agent_id"</span>: <span class="text-neon-green">"sub-abc123"</span>
+<span class="text-white">}</span></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Terminal Style -->
+    <footer class="mt-32 border-t-2 border-base-700 bg-black font-mono text-xs py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 text-base-400">
+                <span class="text-white">root@singularity:</span><span class="text-neon-green">~</span>$ exit_
+            </div>
+            <div class="flex gap-6 text-base-500">
+                <a href="https://github.com/elbader17/singularity" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors" data-i18n="footer.github">[ GITHUB ]</a>
+                <a href="https://github.com/elbader17/singularity/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors" data-i18n="footer.license">[ MIT LICENSE ]</a>
+                <span class="text-base-600" data-i18n="footer.version">SYS.VER.1.0</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CSS Animation for marquee -->
+    <style>
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+
+    <!-- Logic Script -->
+    <script>
+        const translations = {
+            en: {
+                'nav.core': '[ CORE ]',
+                'nav.arq': '[ ARQ ]',
+                'nav.mcp': '[ MCP ]',
+                'nav.init': 'Init Sequence',
+                'hero.state': 'SYSTEM.STATE.MEMORY_ENGINE = ACTIVE',
+                'hero.description': 'Orchestration engine for autonomous agents. Native Blackboard Pattern. <strong class="text-white font-bold">Strategically optimized for AI models that bill per <i>request</i> (not per token).</strong> Reads and writes state without direct communication. Absolute isolation.',
+                'hero.execute': '> EXECUTE',
+                'hero.docs': 'READ_DOCS',
+                'terminal.host': 'root@singularity-host:~#',
+                'terminal.clone': 'git clone https://github.com/elbader17/singularity.git',
+                'terminal.cd': 'cd singularity',
+                'terminal.build': 'go build -o singularity ./cmd/singularity',
+                'terminal.init': './singularity init',
+                'terminal.ok': '[OK] Configuration injected into ~/.config/opencode/opencode.jsonc',
+                'terminal.info': '[INFO] MCP Server ready for incoming connections.',
+                'marquee.zp': '[ ZERO PING-PONG ]',
+                'marquee.co': '[ COST OPTIMIZED ]',
+                'marquee.pre': '[ PER-REQUEST EFFICIENCY ]',
+                'marquee.dag': '[ DAG ORCHESTRATION ]',
+                'marquee.iso': '[ ISOLATED SUB-AGENTS ]',
+                'marquee.da': '[ DEEP ARCHIVE ]',
+                'marquee.co2': '[ COST OPTIMIZED ]',
+                'marquee.dag2': '[ DAG ORCHESTRATION ]',
+                'features.title': 'CORE.SYS',
+                'features.act01': '01 // ACT_BRAIN',
+                'features.act02': 'Active Brain',
+                'features.act03': 'Project state injected without external API cost. Immediate context 100% available offline.',
+                'features.deep01': '02 // DEEP_ARCH',
+                'features.deep02': 'Deep Archive',
+                'features.deep03': 'Historical context on demand. Keeps the token window focused and avoids hallucinations from excess noise.',
+                'features.dag01': '03 // DAG_TASK',
+                'features.dag02': 'DAG Orchestration',
+                'features.dag03': 'Structural graph dependencies. The chaos of generative intelligence submits to strict mathematical topology.',
+                'features.iso01': '04 // ISO_ENV',
+                'features.iso02': 'Isolated Agents',
+                'features.iso03': 'Zero cross-contamination. Each sub-agent receives only its equation variables, increasing precision in reasoning models.',
+                'features.zro01': '05 // ZRO_PING',
+                'features.zro02': 'One-Hit Execution <span class="text-neon-yellow text-sm ml-2">[COST OPTIMIZED]</span>',
+                'features.zro03': 'One request = complete action. <strong class="text-white font-bold">Vital for AI plans that bill per request, not token volume.</strong> Radical elimination of "exploratory chats" (ping-pong) with the API. Algorithmic deduction and state mutation in a single pass.',
+                'arch.title': 'TOPOLOGY',
+                'arch.subtitle': '>> Blackboard_Pattern_Engine',
+                'arch.mem01': 'MEM_01',
+                'arch.active': 'ACTIVE BRAIN',
+                'arch.mem02': 'MEM_02',
+                'arch.deep': 'DEEP ARCHIVE',
+                'arch.q01': 'Q_01',
+                'arch.dag': 'TASK DAG',
+                'arch.root': 'ROOT',
+                'arch.orch': 'ORCHESTRATOR',
+                'arch.state': 'GLOBAL.STATE.R/W',
+                'arch.subA': 'SUB-AGENT_A',
+                'arch.ctxA': 'ISOLATED.CTX',
+                'arch.subB': 'SUB-AGENT_B',
+                'arch.ctxB': 'ISOLATED.CTX',
+                'arch.badger': 'BadgerDB persistence',
+                'arch.mcp': 'Tool exposition layer',
+                'arch.ctx': 'Context injection',
+                'mcp.available': 'Available Methods',
+                'mcp.commit_desc': 'Consolidates state after mutation. Injects insights into the Brain.',
+                'mcp.brain_desc': 'Gets snapshot of current state. Zero external API cost.',
+                'mcp.list_desc': 'DAG topology query by status.',
+                'mcp.deep_desc': 'Archive access. Use only on critical miss in Active Brain.',
+                'mcp.spawn_desc': 'Process bifurcation. Creates sub-entity with isolated context.',
+                'mcp.get_task_desc': 'Init sequence for sub-agent. Retrieves its environment parameters.',
+                'mcp.complete_desc': 'Thread termination. Mutation report to Orchestrator.',
+                'mcp.switch_desc': 'Active session context switch in terminal.',
+                'footer.exit': '~',
+                'footer.github': '[ GITHUB ]',
+                'footer.license': '[ MIT LICENSE ]',
+                'footer.version': 'SYS.VER.1.0'
+            },
+            es: {
+                'nav.core': '[ CORE ]',
+                'nav.arq': '[ ARQ ]',
+                'nav.mcp': '[ MCP ]',
+                'nav.init': 'Init Sequence',
+                'hero.state': 'SYSTEM.STATE.MEMORY_ENGINE = ACTIVE',
+                'hero.description': 'Motor de orquestación para agentes autónomos. Patrón Blackboard nativo. <strong class="text-white font-bold">Optimizado estratégicamente para modelos de IA que facturan por <i>request</i> (no por token).</strong> Lee y escribe el estado sin comunicación directa. Aislamiento absoluto.',
+                'hero.execute': '> EJECUTAR',
+                'hero.docs': 'LEER_DOCS',
+                'terminal.host': 'root@singularity-host:~#',
+                'terminal.clone': 'git clone https://github.com/elbader17/singularity.git',
+                'terminal.cd': 'cd singularity',
+                'terminal.build': 'go build -o singularity ./cmd/singularity',
+                'terminal.init': './singularity init',
+                'terminal.ok': '[OK] Configuración inyectada en ~/.config/opencode/opencode.jsonc',
+                'terminal.info': '[INFO] MCP Server listo para conexiones entrantes.',
+                'marquee.zp': '[ ZERO PING-PONG ]',
+                'marquee.co': '[ COST OPTIMIZED ]',
+                'marquee.pre': '[ PER-REQUEST EFFICIENCY ]',
+                'marquee.dag': '[ DAG ORCHESTRATION ]',
+                'marquee.iso': '[ ISOLATED SUB-AGENTS ]',
+                'marquee.da': '[ DEEP ARCHIVE ]',
+                'marquee.co2': '[ COST OPTIMIZED ]',
+                'marquee.dag2': '[ DAG ORCHESTRATION ]',
+                'features.title': 'CORE.SYS',
+                'features.act01': '01 // ACT_BRAIN',
+                'features.act02': 'Cerebro Activo',
+                'features.act03': 'Estado del proyecto inyectado sin costo de API externo. Contexto inmediato 100% disponible offline.',
+                'features.deep01': '02 // DEEP_ARCH',
+                'features.deep02': 'Archivo Profundo',
+                'features.deep03': 'Contexto histórico bajo demanda. Mantiene la ventana de tokens enfocada y evita alucinaciones por exceso de ruido.',
+                'features.dag01': '03 // DAG_TASK',
+                'features.dag02': 'Orquestación DAG',
+                'features.dag03': 'Dependencias estructurales en grafos. El caos de la inteligencia generativa se somete a la topología matemática estricta.',
+                'features.iso01': '04 // ISO_ENV',
+                'features.iso02': 'Agentes Aislados',
+                'features.iso03': 'Zero contaminación cruzada. Cada sub-agente recibe solo las variables de su ecuación, aumentando la precisión en modelos de razonamiento.',
+                'features.zro01': '05 // ZRO_PING',
+                'features.zro02': 'Ejecución en un Hit <span class="text-neon-yellow text-sm ml-2">[COST OPTIMIZED]</span>',
+                'features.zro03': 'Un request = acción completa. <strong class="text-white font-bold">Vital para planes de IA que facturan por petición, no por volumen de tokens.</strong> Eliminación radical de "charlas exploratorias" (ping-pong) con la API. Deducción algorítmica y mutación de estado en una sola pasada.',
+                'arch.title': 'TOPOLOGY',
+                'arch.subtitle': '>> Blackboard_Pattern_Engine',
+                'arch.mem01': 'MEM_01',
+                'arch.active': 'ACTIVE BRAIN',
+                'arch.mem02': 'MEM_02',
+                'arch.deep': 'DEEP ARCHIVE',
+                'arch.q01': 'Q_01',
+                'arch.dag': 'TASK DAG',
+                'arch.root': 'ROOT',
+                'arch.orch': 'ORCHESTRATOR',
+                'arch.state': 'GLOBAL.STATE.R/W',
+                'arch.subA': 'SUB-AGENT_A',
+                'arch.ctxA': 'ISOLATED.CTX',
+                'arch.subB': 'SUB-AGENT_B',
+                'arch.ctxB': 'ISOLATED.CTX',
+                'arch.badger': 'BadgerDB persistence',
+                'arch.mcp': 'Tool exposition layer',
+                'arch.ctx': 'Context injection',
+                'mcp.available': 'Available Methods',
+                'mcp.commit_desc': 'Consolida el estado tras mutación. Inyecta insights en el Brain.',
+                'mcp.brain_desc': 'Obtiene snapshot del estado actual. Cero costo API externo.',
+                'mcp.list_desc': 'Consulta de topología DAG por estado.',
+                'mcp.deep_desc': 'Acceso al Archive. Usar solo ante miss crítico en Active Brain.',
+                'mcp.spawn_desc': 'Bifurcación de proceso. Crea sub-entidad con contexto aislado.',
+                'mcp.get_task_desc': 'Init sequence para el sub-agente. Recupera sus parámetros de entorno.',
+                'mcp.complete_desc': 'Terminación de hilo. Reporte de mutación al Orchestrator.',
+                'mcp.switch_desc': 'Context switch de la sesión activa en terminal.',
+                'footer.exit': '~',
+                'footer.github': '[ GITHUB ]',
+                'footer.license': '[ MIT LICENSE ]',
+                'footer.version': 'SYS.VER.1.0'
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'en';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = lang;
+            updateTranslations();
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lang-selector').value = currentLang;
+            updateTranslations();
+        });
+
+        lucide.createIcons();
+
+        function switchTool(toolId) {
+            const contents = document.querySelectorAll('.tool-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            const tabs = document.querySelectorAll('#tool-tabs button');
+            tabs.forEach(tab => {
+                tab.classList.remove('border-neon-red', 'bg-base-800', 'text-white', 'border-neon-yellow', 'border-neon-green', 'border-neon-purple');
+                tab.classList.add('border-transparent', 'text-base-400');
+            });
+
+            document.getElementById(`content-${toolId}`).classList.remove('hidden');
+            
+            const activeTab = document.getElementById(`tab-${toolId}`);
+            activeTab.classList.remove('border-transparent', 'text-base-400');
+            
+            const colors = ['border-neon-red', 'border-neon-yellow', 'border-neon-green', 'border-neon-purple'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            if(toolId === 'commit_world_state') {
+                activeTab.classList.add('border-neon-red', 'bg-base-800', 'text-white');
+            } else {
+                activeTab.classList.add(randomColor, 'bg-base-800', 'text-white');
+            }
+        }
+    </script>
+</body>
+</html>
